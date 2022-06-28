@@ -1,6 +1,6 @@
 using MassTransit;
-using MassTransit.EntityFrameworkCoreIntegration;
-using Microsoft.EntityFrameworkCore;
+using MassTransit.Metadata;
+using MongoDB.Driver;
 using Sample.Components;
 using Sample.Components.Consumers;
 using Sample.Components.StateMachines;
@@ -21,35 +21,36 @@ Log.Logger = new LoggerConfiguration()
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
-        services.AddDbContext<RegistrationDbContext>(x =>
-        {
-            var connectionString = hostContext.Configuration.GetConnectionString("Default");
+        var connectionString = hostContext.Configuration.GetConnectionString("Default");
+        const string databaseName = "outboxSample";
 
-            x.UseNpgsql(connectionString, options =>
-            {
-                options.MinBatchSize(1);
-            });
-        });
+        services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
+        services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
+        services.AddMongoDbCollection<Registration>(x => x.RegistrationId);
 
         services.AddMassTransit(x =>
         {
-            x.AddEntityFrameworkOutbox<RegistrationDbContext>(o =>
+            x.AddMongoDbOutbox(o =>
             {
-                o.UsePostgres();
-                
+                o.QueryDelay = TimeSpan.FromSeconds(1);
+                o.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
+                o.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
+
                 o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+
+                o.UseBusOutbox();
             });
-            
+
             x.SetKebabCaseEndpointNameFormatter();
 
             x.AddConsumer<NotifyRegistrationConsumer>();
             x.AddConsumer<SendRegistrationEmailConsumer>();
             x.AddConsumer<AddEventAttendeeConsumer>();
             x.AddSagaStateMachine<RegistrationStateMachine, RegistrationState, RegistrationStateDefinition>()
-                .EntityFrameworkRepository(r =>
+                .MongoDbRepository(r =>
                 {
-                    r.ExistingDbContext<RegistrationDbContext>();
-                    r.UsePostgres();
+                    r.ClientFactory(provider => provider.GetRequiredService<IMongoClient>());
+                    r.DatabaseFactory(provider => provider.GetRequiredService<IMongoDatabase>());
                 });
 
             x.UsingRabbitMq((context, cfg) =>

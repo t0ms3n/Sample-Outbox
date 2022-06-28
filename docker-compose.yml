@@ -1,22 +1,51 @@
-﻿version: "3.6"
+﻿version: '3.8'
+
 services:
   rabbitmq:
     image: masstransit/rabbitmq:latest
+    networks:
+      - mongors-network
     ports:
       - "5672:5672"
       - "15672:15672"
-  postgres:
-    image: "postgres"
-    environment:
-      - "POSTGRES_PASSWORD=Password12!"
+  mongo1:
+    container_name: mongo1
+    image: mongo
+    volumes:
+      - ./rs-init.sh:/scripts/rs-init.sh
+    networks:
+      - mongors-network
     ports:
-      - 5432:5432
+      - 27017:27017
+      - 27021:27017
+    links:
+      - mongo2
+      - mongo3
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+  mongo2:
+    container_name: mongo2
+    image: mongo
+    networks:
+      - mongors-network
+    ports:
+      - 27022:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+  mongo3:
+    container_name: mongo3
+    image: mongo
+    networks:
+      - mongors-network
+    ports:
+      - 27023:27017
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
   api:
     image: sample/api
+    networks:
+      - mongors-network
     environment: 
      - ASPNETCORE_ENVIRONMENT=Development
      - ASPNETCORE_URLS=http://+:80
-     - ConnectionStrings__Default=host=postgres;user id=postgres;password=Password12!;database=Outbox;
+     - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
     build:
       context: ./src
       dockerfile: Dockerfile.api
@@ -24,8 +53,15 @@ services:
      - "5000:80"
   service:
     image: sample/worker
+    networks:
+      - mongors-network
     environment: 
-     - ConnectionStrings__Default=host=postgres;user id=postgres;password=Password12!;database=Outbox;
+     - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
     build:
       context: ./src
       dockerfile: Dockerfile.worker
+
+networks:
+  mongors-network:
+    driver: bridge
+
