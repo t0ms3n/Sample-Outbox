@@ -38,14 +38,32 @@ services:
     ports:
       - 27023:27017
     entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs" ]
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    networks:
+      - mongors-network
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "9411:9411"
   api:
     image: sample/api
     networks:
       - mongors-network
     environment: 
-     - ASPNETCORE_ENVIRONMENT=Development
-     - ASPNETCORE_URLS=http://+:80
-     - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_SAMPLER_TYPE=remote
+      - JAEGER_SAMPLING_ENDPOINT=http://jaeger:5778/sampling
     build:
       context: ./src
       dockerfile: Dockerfile.api
@@ -56,7 +74,12 @@ services:
     networks:
       - mongors-network
     environment: 
-     - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Default=mongodb://mongo1,mongo2,mongo3
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_SAMPLER_TYPE=remote
+      - JAEGER_SAMPLING_ENDPOINT=http://jaeger:5778/sampling
     build:
       context: ./src
       dockerfile: Dockerfile.worker

@@ -1,6 +1,10 @@
+using System.Diagnostics;
 using MassTransit;
-using MassTransit.MongoDbIntegration;
+using MassTransit.Metadata;
 using MongoDB.Driver;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Sample.Components;
 using Serilog;
 using Serilog.Events;
@@ -30,6 +34,29 @@ builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionStrin
 builder.Services.AddSingleton<IMongoDatabase>(provider => provider.GetRequiredService<IMongoClient>().GetDatabase(databaseName));
 builder.Services.AddMongoDbCollection<Registration>(x => x.RegistrationId);
 
+builder.Services.AddOpenTelemetryTracing(x =>
+{
+    x.SetResourceBuilder(ResourceBuilder.CreateDefault()
+            .AddService("api")
+            .AddTelemetrySdk()
+            .AddEnvironmentVariableDetector())
+        .AddSource("MassTransit")
+        .AddAspNetCoreInstrumentation()
+        .AddJaegerExporter(o =>
+        {
+            o.AgentHost = HostMetadataCache.IsRunningInContainer ? "jaeger" : "localhost";
+            o.AgentPort = 6831;
+            o.MaxPayloadSizeInBytes = 4096;
+            o.ExportProcessorType = ExportProcessorType.Batch;
+            o.BatchExportProcessorOptions = new BatchExportProcessorOptions<Activity>
+            {
+                MaxQueueSize = 2048,
+                ScheduledDelayMilliseconds = 5000,
+                ExporterTimeoutMilliseconds = 30000,
+                MaxExportBatchSize = 512,
+            };
+        });
+});
 builder.Services.AddMassTransit(x =>
 {
     x.AddMongoDbOutbox(o =>
