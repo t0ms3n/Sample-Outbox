@@ -5,6 +5,7 @@ using MassTransit.EntityFrameworkCoreIntegration;
 using MassTransit.Logging;
 using MassTransit.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -83,6 +84,17 @@ builder.Services.AddMassTransit(x =>
     x.UsingRabbitMq((_, cfg) =>
     {
         cfg.AutoStart = true;
+        cfg.ConfigureNewtonsoftJsonSerializer(settings =>
+        {
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            return settings;
+        });
+        cfg.ConfigureNewtonsoftJsonDeserializer(settings =>
+        {
+            settings.TypeNameHandling = TypeNameHandling.Auto;
+            return settings;
+        });
+        cfg.UseNewtonsoftJsonSerializer();
     });
 });
 

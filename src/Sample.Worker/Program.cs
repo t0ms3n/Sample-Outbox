@@ -2,6 +2,7 @@ using System.Diagnostics;
 using MassTransit;
 using MassTransit.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -81,6 +82,17 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.UsingRabbitMq((context, cfg) =>
             {
+                cfg.ConfigureNewtonsoftJsonSerializer(settings =>
+                {
+                    settings.TypeNameHandling = TypeNameHandling.Auto;
+                    return settings;
+                });
+                cfg.ConfigureNewtonsoftJsonDeserializer(settings =>
+                {
+                    settings.TypeNameHandling = TypeNameHandling.Auto;
+                    return settings;
+                });
+                cfg.UseNewtonsoftJsonSerializer();
                 cfg.ConfigureEndpoints(context);
             });
         });
