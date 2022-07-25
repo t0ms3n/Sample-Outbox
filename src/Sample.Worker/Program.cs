@@ -69,7 +69,7 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.SetKebabCaseEndpointNameFormatter();
 
-            x.AddConsumer<NotifyRegistrationConsumer>();
+            x.AddConsumer<NotifyRegistrationConsumer, NotifyRegistrationConsumerDefinition>();
             x.AddConsumer<SendRegistrationEmailConsumer>();
             x.AddConsumer<AddEventAttendeeConsumer>();
             x.AddSagaStateMachine<RegistrationStateMachine, RegistrationState, RegistrationStateDefinition>()
