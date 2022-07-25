@@ -6,8 +6,8 @@ services:
     networks:
       - mongors-network
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5673:5672"
+      - "15673:15672"
   mongo1:
     container_name: mongo1
     image: mongo
@@ -16,7 +16,7 @@ services:
     networks:
       - mongors-network
     ports:
-      - 27017:27017
+      - 27018:27017
       - 27021:27017
     links:
       - mongo2

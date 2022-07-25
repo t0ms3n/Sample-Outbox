@@ -70,6 +70,7 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((_, cfg) =>
     {
+        cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673");
     });
 
     x.RemoveMassTransitHostedService();
