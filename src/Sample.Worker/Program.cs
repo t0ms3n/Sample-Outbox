@@ -68,7 +68,7 @@ var host = Host.CreateDefaultBuilder(args)
             });
 
             x.SetKebabCaseEndpointNameFormatter();
-
+            x.AddDelayedMessageScheduler();
             x.AddConsumer<NotifyRegistrationConsumer, NotifyRegistrationConsumerDefinition>();
             x.AddConsumer<SendRegistrationEmailConsumer>();
             x.AddConsumer<AddEventAttendeeConsumer>();
@@ -81,6 +81,7 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.UsingRabbitMq((context, cfg) =>
             {
+                cfg.UseDelayedMessageScheduler();
                 cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673" );
                 cfg.ConfigureEndpoints(context);
             });
