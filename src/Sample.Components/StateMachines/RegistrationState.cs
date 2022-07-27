@@ -16,4 +16,6 @@ public class RegistrationState :
     public decimal Payment { get; set; }
     public int Version { get; set; }
     public Guid CorrelationId { get; set; }
+
+    public Guid? TimeoutId { get; set; }
 }
