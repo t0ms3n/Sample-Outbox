@@ -86,14 +86,15 @@ builder.Services.AddMassTransit(x =>
         cfg.AutoStart = true;
         cfg.ConfigureNewtonsoftJsonSerializer(settings =>
         {
-            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
             return settings;
         });
         cfg.ConfigureNewtonsoftJsonDeserializer(settings =>
         {
-            settings.TypeNameHandling = TypeNameHandling.Auto;
+            settings.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
             return settings;
         });
+        cfg.UseNewtonsoftJsonSerializer();
         cfg.UseNewtonsoftJsonSerializer();
     });
 });
