@@ -67,9 +67,6 @@ services:
     build:
       context: ./src
       dockerfile: Dockerfile.api
-      args:
-        http_proxy: http://10.236.76.16:8080
-        https_proxy: http://10.236.76.16:8080
 
     ports:
      - "5000:80"
@@ -87,9 +84,6 @@ services:
     build:
       context: ./src
       dockerfile: Dockerfile.worker
-      args:
-        http_proxy: http://10.236.76.16:8080
-        https_proxy: http://10.236.76.16:8080
 
 networks:
   mongors-network:
