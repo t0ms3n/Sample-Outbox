@@ -38,7 +38,7 @@ public class RegistrationService :
             MemberId = registration.MemberId,
             EventId = registration.EventId,
             Payment = payment
-        });
+        }, pipe => pipe.Delay = TimeSpan.FromSeconds(30));
 
         try
         {
