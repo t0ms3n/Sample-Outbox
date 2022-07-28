@@ -33,7 +33,10 @@ public class RegistrationStateMachine :
                     MemberId = context.Saga.MemberId
                 })
                 .Schedule(RegistrationTimeout,
-                    context => { return context.Init<RegistrationTimeout>(new { context.Saga.CorrelationId }); },
+                    context =>
+                    {
+                        return context.Init<RegistrationTimeout>(new { context.Saga.CorrelationId });
+                    },
                     context => {
                         return TimeSpan.FromSeconds(30);
                     })
