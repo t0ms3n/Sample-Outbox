@@ -83,17 +83,21 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.UseDelayedMessageScheduler();
-                cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673" );
-                cfg.ConfigureNewtonsoftJsonSerializer(settings => {
-                    settings.Formatting = Formatting.Indented;
-                    return settings;
+                cfg.ConfigureNewtonsoftJsonSerializer(_ =>
+                {
+                    _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
+                    _.Formatting = Formatting.Indented;
+                    return _;
                 });
-                cfg.ConfigureNewtonsoftJsonDeserializer(settings => {
-                    settings.Formatting = Formatting.Indented;
-                    return settings;
+                cfg.ConfigureNewtonsoftJsonDeserializer(_ =>
+                {
+                    _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
+                    _.Formatting = Formatting.Indented;
+                    return _;
                 });
                 cfg.UseNewtonsoftJsonSerializer();
+                cfg.UseDelayedMessageScheduler();
+                cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673" );
                 cfg.ConfigureEndpoints(context);
             });
         });

@@ -5,7 +5,6 @@ using MassTransit;
 using MassTransit.MongoDbIntegration;
 using MongoDB.Driver;
 
-
 public class RegistrationService :
     IRegistrationService
 {

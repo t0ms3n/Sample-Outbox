@@ -2,6 +2,7 @@ using System.Diagnostics;
 using MassTransit;
 using MassTransit.Metadata;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -70,6 +71,19 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((_, cfg) =>
     {
+        cfg.ConfigureNewtonsoftJsonSerializer(_ =>
+        {
+            _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
+            _.Formatting = Formatting.Indented;
+            return _;
+        });
+        cfg.ConfigureNewtonsoftJsonDeserializer(_ =>
+        {
+            _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
+            _.Formatting = Formatting.Indented;
+            return _;
+        });
+        cfg.UseNewtonsoftJsonSerializer();
         cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673");
     });
 

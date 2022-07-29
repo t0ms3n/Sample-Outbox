@@ -38,7 +38,7 @@ public class RegistrationStateMachine :
                         return context.Init<RegistrationTimeout>(new { context.Saga.CorrelationId });
                     },
                     context => {
-                        return TimeSpan.FromSeconds(30);
+                        return TimeSpan.FromSeconds(15);
                     })
                 .If(context => context.Saga.Payment < 50m && context.GetRetryAttempt() == 0,
                     fail => fail.Then(_ => throw new ApplicationException("Totally random, but you didn't pay enough for quality service")))
@@ -65,7 +65,7 @@ public class RegistrationStateMachine :
                             },
                             context =>
                             {
-                                return TimeSpan.FromSeconds(30);
+                                return TimeSpan.FromSeconds(5);
                             })));
 
     }
