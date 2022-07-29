@@ -5,7 +5,6 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-
 public class RegistrationService :
     IRegistrationService
 {

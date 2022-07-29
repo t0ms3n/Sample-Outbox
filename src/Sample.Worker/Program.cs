@@ -84,11 +84,13 @@ var host = Host.CreateDefaultBuilder(args)
             {
                 cfg.ConfigureNewtonsoftJsonSerializer(_ =>
                 {
+                    _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
                     _.Formatting = Formatting.Indented;
                     return _;
                 });
                 cfg.ConfigureNewtonsoftJsonDeserializer(_ =>
                 {
+                    _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
                     _.Formatting = Formatting.Indented;
                     return _;
                 });

@@ -81,17 +81,19 @@ builder.Services.AddMassTransit(x =>
         o.UseBusOutbox();
     });
 
-    x.UsingRabbitMq((_, cfg) =>
+    x.UsingRabbitMq((context, cfg) =>
     {
         cfg.AutoStart = true;
         cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673");
         cfg.ConfigureNewtonsoftJsonSerializer(_ =>
         {
+            _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
             _.Formatting = Formatting.Indented;
             return _;
         });
         cfg.ConfigureNewtonsoftJsonDeserializer(_ =>
         {
+            _.Converters.Add(new TypeNameHandlingConverter(TypeNameHandling.Auto));
             _.Formatting = Formatting.Indented;
             return _;
         });
