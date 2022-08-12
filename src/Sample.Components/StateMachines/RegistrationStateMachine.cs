@@ -32,11 +32,11 @@ public class RegistrationStateMachine :
                     EventId = context.Saga.EventId,
                     MemberId = context.Saga.MemberId
                 })
-                .Schedule(RegistrationTimeout,
-                    context => { return context.Init<RegistrationTimeout>(new { context.Saga.CorrelationId }); },
-                    context => {
-                        return TimeSpan.FromSeconds(30);
-                    })
+                //.Schedule(RegistrationTimeout,
+                //    context => { return context.Init<RegistrationTimeout>(new { context.Saga.CorrelationId }); },
+                //    context => {
+                //        return TimeSpan.FromSeconds(30);
+                //    })
                 .If(context => context.Saga.Payment < 50m && context.GetRetryAttempt() == 0,
                     fail => fail.Then(_ => throw new ApplicationException("Totally random, but you didn't pay enough for quality service")))
                 .Publish(context => new AddEventAttendee

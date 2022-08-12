@@ -1,5 +1,4 @@
 using MassTransit;
-
 namespace Sample.Components.Consumers;
 
 public class NotifyRegistrationConsumerDefinition : ConsumerDefinition<NotifyRegistrationConsumer>

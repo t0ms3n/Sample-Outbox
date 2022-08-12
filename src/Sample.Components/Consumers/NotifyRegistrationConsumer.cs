@@ -17,9 +17,9 @@ public class NotifyRegistrationConsumer :
 
     public Task Consume(ConsumeContext<RegistrationSubmitted> context)
     {
-        _logger.LogInformation("Member {MemberId} registered for event {EventId} on {RegistrationDate}", context.Message.MemberId, context.Message.EventId,
-            context.Message.RegistrationDate);
-
+        _logger.LogInformation("Member {MemberId} registered for event {EventId} on {RegistrationDate}. Retry {Retry} Redelivery {Redelivery}", context.Message.MemberId, context.Message.EventId,
+            context.Message.RegistrationDate, context.GetRetryAttempt(),  context.GetRedeliveryCount());
+        throw new Exception("Redeliver me.");
         return Task.CompletedTask;
     }
 }
