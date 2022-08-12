@@ -96,6 +96,11 @@ var host = Host.CreateDefaultBuilder(args)
                     return _;
                 });
                 cfg.UseNewtonsoftJsonSerializer();
+                cfg.UseDelayedRedelivery(x =>
+                {
+                    x.Interval(1, TimeSpan.FromSeconds(5));
+                });
+                cfg.UseMessageRetry(x => x.Immediate(1));
                 cfg.UseDelayedMessageScheduler();
                 cfg.Host(HostMetadataCache.IsRunningInContainer ? "rabbitmq://localhost:5672" : "rabbitmq://localhost:5673" );
                 cfg.ConfigureEndpoints(context);
